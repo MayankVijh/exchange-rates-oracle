@@ -1,21 +1,17 @@
 package net.corda.examples.oracle.service
 
-import io.mockk.every
-import io.mockk.mockk
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndContract
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.TransactionBuilder
+import net.corda.examples.oracle.HttpExchangeRatesServiceMock
 import net.corda.examples.oracle.base.contract.EXCHANGE_RATE_PROGRAM_ID
 import net.corda.examples.oracle.base.contract.ExchangeRateContract
 import net.corda.examples.oracle.base.contract.ExchangeRateState
 import net.corda.examples.oracle.service.service.ExchangeRateOracle
-import net.corda.examples.oracle.service.service.HttpExchangeRatesService
 import net.corda.testing.core.SerializationEnvironmentRule
 import net.corda.testing.core.TestIdentity
 import net.corda.testing.node.MockServices
-import org.json.JSONObject
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.util.function.Predicate
@@ -25,29 +21,13 @@ import kotlin.test.assertFailsWith
 class ExchangeRateServiceTests {
     private val oracleIdentity = TestIdentity(CordaX500Name("Oracle", "New York", "US"))
     private val dummyServices = MockServices(listOf("net.corda.examples.oracle.base.contract"), oracleIdentity)
-    private lateinit var oracle: ExchangeRateOracle
+    private val oracle = ExchangeRateOracle(dummyServices, HttpExchangeRatesServiceMock())
     private val aliceIdentity = TestIdentity(CordaX500Name("Alice", "", "GB"))
     private val notaryIdentity = TestIdentity(CordaX500Name("Notary", "", "GB"))
 
     @Rule
     @JvmField
     val testSerialization = SerializationEnvironmentRule()
-
-    @Before
-    fun setup() {
-        fun calculateExchangeRate(fromCurrencyCode: String, toCurrencyCode: String): Double {
-            val listOfCurrencyCodes = listOf("BGN", "USD")
-            if (!(fromCurrencyCode in listOfCurrencyCodes && fromCurrencyCode in listOfCurrencyCodes)) {
-                throw IllegalArgumentException()
-            } else {
-                return 0.6
-            }
-        }
-
-        val mockHttpService = mockk<HttpExchangeRatesService>()
-        every { mockHttpService.getExchangeRate(any(), any()) } returns calculateExchangeRate()
-        oracle = ExchangeRateOracle(dummyServices, mockHttpService)
-    }
 
     @Test
     fun `oracle returns correct exchange rate`() {

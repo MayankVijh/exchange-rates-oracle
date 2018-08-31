@@ -4,10 +4,10 @@ import net.corda.core.node.services.CordaService
 import net.corda.core.serialization.SingletonSerializeAsToken
 
 @CordaService
-class HttpExchangeRatesService : SingletonSerializeAsToken() {
+open class HttpExchangeRatesService : SingletonSerializeAsToken() {
     private val baseUrl = "https://api.exchangeratesapi.io/latest?"
 
-    fun getExchangeRate(fromCurrencyCode: String, toCurrencyCode: String): Double {
+    open fun getExchangeRate(fromCurrencyCode: String, toCurrencyCode: String): Double {
         val url = "{$baseUrl}base=$fromCurrencyCode&symbols=$toCurrencyCode"
         val response = khttp.get(url)
         try {
