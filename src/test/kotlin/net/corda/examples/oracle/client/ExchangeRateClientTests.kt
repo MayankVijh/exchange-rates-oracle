@@ -2,10 +2,10 @@ package net.corda.examples.oracle.client
 
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
+import net.corda.examples.oracle.mock.QueryHandlerMock
+import net.corda.examples.oracle.mock.SignHandlerMock
 import net.corda.examples.oracle.base.contract.ExchangeRateState
 import net.corda.examples.oracle.client.flow.CreateExchangeRate
-import net.corda.examples.oracle.service.flow.QueryHandler
-import net.corda.examples.oracle.service.flow.SignHandler
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.MockNodeParameters
 import net.corda.testing.node.StartedMockNode
@@ -24,7 +24,7 @@ class ExchangeRateClientTests {
 
         val oracleName = CordaX500Name("Oracle", "New York", "US")
         val oracle = mockNet.createNode(MockNodeParameters(legalName = oracleName))
-        listOf(QueryHandler::class.java, SignHandler::class.java).forEach { oracle.registerInitiatedFlow(it) }
+        listOf(QueryHandlerMock::class.java, SignHandlerMock::class.java).forEach { oracle.registerInitiatedFlow(it) }
 
         mockNet.runNetwork()
     }
@@ -44,7 +44,7 @@ class ExchangeRateClientTests {
         val result = flow.getOrThrow().tx.outputsOfType<ExchangeRateState>().single()
         assertEquals(fromCurrencyCode, result.fromCurrencyCode)
         assertEquals(toCurrencyCode, result.toCurrencyCode)
-//        assertEquals(0.6, result.rate)
+        assertEquals(0.6, result.rate)
     }
 
 }

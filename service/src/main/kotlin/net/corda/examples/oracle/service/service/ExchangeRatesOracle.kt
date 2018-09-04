@@ -9,11 +9,13 @@ import net.corda.core.transactions.FilteredTransaction
 import net.corda.examples.oracle.base.contract.ExchangeRateContract
 
 @CordaService
-class ExchangeRateOracle(val services: ServiceHub, val httpExchangeRatesService: HttpExchangeRatesService) : SingletonSerializeAsToken() {
+open class ExchangeRatesOracle(val services: ServiceHub) : SingletonSerializeAsToken() {
     private val myKey = services.myInfo.legalIdentities.first().owningKey
 
+    open fun httpExchangeRatesService() = services.cordaService(HttpExchangeRatesService::class.java)
+
     fun query(fromCurrencyCode: String, toCurrencyCode: String): Double {
-        return httpExchangeRatesService.getExchangeRate(fromCurrencyCode, toCurrencyCode)
+        return httpExchangeRatesService().getExchangeRate(fromCurrencyCode, toCurrencyCode)
     }
 
     fun sign(ftx: FilteredTransaction): TransactionSignature {

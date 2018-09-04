@@ -9,10 +9,10 @@ import net.corda.core.transactions.FilteredTransaction
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.unwrap
 import net.corda.examples.oracle.base.flow.SignExchangeRate
-import net.corda.examples.oracle.service.service.ExchangeRateOracle
+import net.corda.examples.oracle.service.service.ExchangeRatesOracle
 
 @InitiatedBy(SignExchangeRate::class)
-class SignHandler(val session: FlowSession) : FlowLogic<Unit>() {
+open class SignHandler(val session: FlowSession) : FlowLogic<Unit>() {
     companion object {
         object RECEIVING : ProgressTracker.Step("Receiving sign request.")
         object SIGNING : ProgressTracker.Step("Signing filtered transaction.")
@@ -21,6 +21,8 @@ class SignHandler(val session: FlowSession) : FlowLogic<Unit>() {
 
     override val progressTracker = ProgressTracker(RECEIVING, SIGNING, SENDING)
 
+    open fun exchangeRatesOracle() = serviceHub.cordaService(ExchangeRatesOracle::class.java)
+
     @Suspendable
     override fun call() {
         progressTracker.currentStep = RECEIVING
@@ -28,7 +30,7 @@ class SignHandler(val session: FlowSession) : FlowLogic<Unit>() {
 
         progressTracker.currentStep = SIGNING
         val response = try {
-            serviceHub.cordaService(ExchangeRateOracle::class.java).sign(request)
+            exchangeRatesOracle().sign(request)
         } catch (e: Exception) {
             throw FlowException(e)
         }

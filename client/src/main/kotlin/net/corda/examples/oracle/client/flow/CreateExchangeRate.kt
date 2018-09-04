@@ -7,6 +7,7 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.identity.CordaX500Name
+import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
@@ -19,7 +20,7 @@ import java.util.function.Predicate
 
 @InitiatingFlow
 @StartableByRPC
-class CreateExchangeRate(val fromCurrencyCode: String, val toCurrencyCode: String) : FlowLogic<SignedTransaction>() {
+open class CreateExchangeRate(val fromCurrencyCode: String, val toCurrencyCode: String) : FlowLogic<SignedTransaction>() {
 
     companion object {
         object SET_UP : ProgressTracker.Step("Initialising flow.")
@@ -80,5 +81,10 @@ class CreateExchangeRate(val fromCurrencyCode: String, val toCurrencyCode: Strin
 
         progressTracker.currentStep = FINALISING
         return subFlow(FinalityFlow(stx))
+    }
+
+    @Suspendable
+    open fun querySubFlow(oracle: Party): Double {
+        return subFlow(QueryExchangeRate(oracle, fromCurrencyCode, toCurrencyCode))
     }
 }

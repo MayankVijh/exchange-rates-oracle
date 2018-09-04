@@ -8,10 +8,10 @@ import net.corda.core.flows.InitiatedBy
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.unwrap
 import net.corda.examples.oracle.base.flow.QueryExchangeRate
-import net.corda.examples.oracle.service.service.ExchangeRateOracle
+import net.corda.examples.oracle.service.service.ExchangeRatesOracle
 
 @InitiatedBy(QueryExchangeRate::class)
-class QueryHandler(val session: FlowSession) : FlowLogic<Unit>() {
+open class QueryHandler(val session: FlowSession) : FlowLogic<Unit>() {
     companion object {
         object RECEIVING : ProgressTracker.Step("Receiving query request.")
         object CALCULATING : ProgressTracker.Step("Calculating exchange rate.")
@@ -20,6 +20,8 @@ class QueryHandler(val session: FlowSession) : FlowLogic<Unit>() {
 
     override val progressTracker = ProgressTracker(RECEIVING, CALCULATING, SENDING)
 
+    open fun exchangeRatesOracle() = serviceHub.cordaService(ExchangeRatesOracle::class.java)
+
     @Suspendable
     override fun call() {
         progressTracker.currentStep = RECEIVING
@@ -27,7 +29,7 @@ class QueryHandler(val session: FlowSession) : FlowLogic<Unit>() {
 
         progressTracker.currentStep = CALCULATING
         val response = try {
-            serviceHub.cordaService(ExchangeRateOracle::class.java).query(request.first, request.second)
+            exchangeRatesOracle().query(request.first, request.second)
         } catch (e: Exception) {
             // Re-throw the exception as a FlowException so its propagated to the querying node.
             throw FlowException(e)

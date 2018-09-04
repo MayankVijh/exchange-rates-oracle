@@ -4,11 +4,10 @@ import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndContract
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.transactions.TransactionBuilder
-import net.corda.examples.oracle.HttpExchangeRatesServiceMock
+import net.corda.examples.oracle.mock.ExchangeRatesOracleMock
 import net.corda.examples.oracle.base.contract.EXCHANGE_RATE_PROGRAM_ID
 import net.corda.examples.oracle.base.contract.ExchangeRateContract
 import net.corda.examples.oracle.base.contract.ExchangeRateState
-import net.corda.examples.oracle.service.service.ExchangeRateOracle
 import net.corda.testing.core.SerializationEnvironmentRule
 import net.corda.testing.core.TestIdentity
 import net.corda.testing.node.MockServices
@@ -21,7 +20,7 @@ import kotlin.test.assertFailsWith
 class ExchangeRateServiceTests {
     private val oracleIdentity = TestIdentity(CordaX500Name("Oracle", "New York", "US"))
     private val dummyServices = MockServices(listOf("net.corda.examples.oracle.base.contract"), oracleIdentity)
-    private val oracle = ExchangeRateOracle(dummyServices, HttpExchangeRatesServiceMock())
+    private val oracle = ExchangeRatesOracleMock(dummyServices)
     private val aliceIdentity = TestIdentity(CordaX500Name("Alice", "", "GB"))
     private val notaryIdentity = TestIdentity(CordaX500Name("Notary", "", "GB"))
 
@@ -50,7 +49,8 @@ class ExchangeRateServiceTests {
                 .toWireTransaction(dummyServices)
                 .buildFilteredTransaction(Predicate {
                     when (it) {
-                        is Command<*> -> oracle.services.myInfo.legalIdentities.first().owningKey in it.signers && it.value is ExchangeRateContract.Create
+                        is Command<*> -> oracle.services.myInfo.legalIdentities.first().owningKey in it.signers &&
+                                it.value is ExchangeRateContract.Create
                         else -> false
                     }
                 })
@@ -68,7 +68,8 @@ class ExchangeRateServiceTests {
                 .toWireTransaction(oracle.services)
                 .buildFilteredTransaction(Predicate {
                     when (it) {
-                        is Command<*> -> oracle.services.myInfo.legalIdentities.first().owningKey in it.signers && it.value is ExchangeRateContract.Create
+                        is Command<*> -> oracle.services.myInfo.legalIdentities.first().owningKey in it.signers &&
+                                it.value is ExchangeRateContract.Create
                         else -> false
                     }
                 })
