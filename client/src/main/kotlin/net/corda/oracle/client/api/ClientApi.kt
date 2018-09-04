@@ -49,12 +49,13 @@ class ClientApi(val rpcOps: CordaRPCOps) {
      */
     @GET
     @Path("create-rate")
-    @Produces(MediaType.APPLICATION_JSON)
-    fun createExchangeRate(@QueryParam(value = "n") n: Int): Response {
+    @Produces(MediaType.APPLICATION_JSON)// fromCurrencyCode: String, val toCurrencyCode: String
+    fun createExchangeRate(@QueryParam(value = "from") fromCurrencyCode: String,
+                           @QueryParam(value = "to") toCurrencyCode: String): Response {
         // Start the CreateExchangeRate flow. We block and wait for the flow to return.
         val (status, message) = try {
-            val flowHandle = rpcOps.startFlowDynamic(CreateExchangeRate::class.java, n)
-            val result = flowHandle.returnValue.getOrThrow().tx.outputsOfType<ExchangeRateState>().single()
+            val flowHandle = rpcOps.startFlowDynamic(CreateExchangeRate::class.java, fromCurrencyCode, toCurrencyCode)
+            val result = flowHandle.returnValue.getOrThrow().tx.outputsOfType<ExchangeRateState>().single().rate
             // Return the response.
             Response.Status.CREATED to "$result"
         } catch (e: Exception) {

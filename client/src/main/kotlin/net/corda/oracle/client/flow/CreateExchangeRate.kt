@@ -82,9 +82,4 @@ open class CreateExchangeRate(val fromCurrencyCode: String, val toCurrencyCode: 
         progressTracker.currentStep = FINALISING
         return subFlow(FinalityFlow(stx))
     }
-
-    @Suspendable
-    open fun querySubFlow(oracle: Party): Double {
-        return subFlow(QueryExchangeRate(oracle, fromCurrencyCode, toCurrencyCode))
-    }
 }
