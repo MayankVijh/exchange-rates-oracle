@@ -1,4 +1,4 @@
-# Exchange rates Corda oracle
+# Exchange Rates Corda Oracle
 
 Built following the [Corda Prime Numbers Oracle Example](https://github.com/corda/oracle-example)
 
