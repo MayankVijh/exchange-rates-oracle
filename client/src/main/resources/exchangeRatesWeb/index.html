@@ -5,6 +5,28 @@
     <title>Oracle - Tutorial</title>
 </head>
 <body>
-<div><strong>TODO:</strong> Add some content here.</div>
+    <script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script>
+        function getExchangeRate() {
+            var from = $('#from').val()
+            var to = $('#to').val()
+            $.ajax({
+                url: `http://localhost:10007/api/exchange-rates/create-rate/?from=${from}&to=${to}`,
+                success: function (data) {
+                    $('#result').text(data.result)
+                }
+            })
+        }
+    </script>
+
+    <label for="from">Enter first currency:</label>
+    <input type="text" id="from"><br/>
+    <label for="to">Enter second currency:</label>
+    <input type="text" id="to"><br/>
+    <button onclick="getExchangeRate()">Go</button>
+    <h2>Result: </h2><h3 id="result"></h3>
 </body>
 </html>
